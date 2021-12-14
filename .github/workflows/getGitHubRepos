@@ -1,0 +1,26 @@
+name: get GitHub Repos
+on:
+  workflow_dispatch:
+jobs:
+  getGitHubRepos:
+    runs-on: ubuntu-latest
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
+
+          USER=francbi
+          TOK=${{ secrets.PAT }}
+          ORG=manulife-gwam
+
+          for p in 1 2 3; do
+	          for i in `curl -s -S -H "Accept: application/vnd.github.v3+json" -u "${USER}:${TOK}" "https://api.github.com/orgs/${ORG}/repos?page=${p}&per_page=100&language=java" | jq -r '.[].ssh_url'`; do
+		          git clone --quiet "${i}" repo
+
+		          if grep -rni -E 'log4j|boot-starter' **/pom.xml 2>/dev/null || grep -rni -E 'log4j|boot-starter' **/build.gradle 2>/dev/null; then
+			          echo "${i}"
+		          fi
+
+		          rm -rf repo
+	          done
+          done
